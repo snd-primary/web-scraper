@@ -1,19 +1,8 @@
 {
-  "mcpServers": {
-    "github": {
-      "command": "node",
-      "args": [
-        "C:\\Program Files\\nodejs\\node_modules\\@modelcontextprotocol\\server-github\\dist\\index.js"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token"
-      }
-    },
-    "web-scraper": {
-      "command": "python",
-      "args": [
-        "%REPO_DIR%\\web_scraper_server.py"
-      ]
-    }
-  }
+	"mcpServers": {
+		"web-scraper": {
+			"command": "python",
+			"args": ["%REPO_DIR%\\web_scraper_server.py"]
+		}
+	}
 }
