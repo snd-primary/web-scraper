@@ -81,3 +81,11 @@ web-scraper MCPサーバーは以下の関数を提供します:
   - ページのタイトル
   - メタ description
   - 本文テキストの最初の1000文字
+
+## 注意事項
+
+このリポジトリはPythonベースのMCPサーバーです。リポジトリ内に一部空のNode.js関連ファイルが残っていますが、実際の実装は完全にPythonで行われています。
+主要なファイルは以下の通りです：
+
+- `web_scraper_server.py` - MCPサーバーのメイン実装
+- `requirements.txt` - 必要なPythonパッケージのリスト
