@@ -3,18 +3,20 @@ import sys
 import os
 from typing import Dict, Any, List, Optional
 
-from mcp import create_app, Request, Response
+# MCPのインポート部分を修正
+import mcp
 from pydantic import BaseModel
 
 from web_scraper import fetch_mdn_doc, create_mdn_context
 
-app = create_app()
+# MCPアプリケーション作成方法を修正
+app = mcp.App()
 
 class MDNRequest(BaseModel):
     url: str
 
 @app.post("/fetch-mdn")
-async def fetch_mdn_endpoint(request: Request[MDNRequest]) -> Response:
+async def fetch_mdn_endpoint(request: mcp.Request) -> mcp.Response:
     """
     MDNドキュメントを取得するエンドポイント
     
@@ -24,12 +26,14 @@ async def fetch_mdn_endpoint(request: Request[MDNRequest]) -> Response:
     Returns:
         成功または失敗レスポンス
     """
-    url = request.body.url
+    # リクエストボディをパース
+    body = await request.json()
+    url = body.get("url", "")
     
     # MDN URLの検証
     if not url.startswith("https://developer.mozilla.org/"):
-        return Response.json(
-            {"error": "Invalid URL. Only MDN URLs (https://developer.mozilla.org/) are supported."},
+        return mcp.Response(
+            json={"error": "Invalid URL. Only MDN URLs (https://developer.mozilla.org/) are supported."},
             status_code=400
         )
     
@@ -37,24 +41,26 @@ async def fetch_mdn_endpoint(request: Request[MDNRequest]) -> Response:
     doc_content = await fetch_mdn_doc(url)
     
     if not doc_content:
-        return Response.json(
-            {"error": "Failed to fetch or parse MDN document."},
+        return mcp.Response(
+            json={"error": "Failed to fetch or parse MDN document."},
             status_code=500
         )
     
     # コンテキストの作成
     context = create_mdn_context(doc_content, url)
     
-    return Response.json({
-        "status": "success",
-        "message": "MDN document fetched successfully",
-        "context": context
-    })
+    return mcp.Response(
+        json={
+            "status": "success",
+            "message": "MDN document fetched successfully",
+            "context": context
+        }
+    )
 
 @app.get("/health")
-async def health_check() -> Response:
+async def health_check() -> mcp.Response:
     """ヘルスチェックエンドポイント"""
-    return Response.json({"status": "healthy"})
+    return mcp.Response(json={"status": "healthy"})
 
 if __name__ == "__main__":
     # 環境変数からホストとポートを取得（デフォルト値あり）
