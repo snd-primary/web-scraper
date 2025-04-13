@@ -9,20 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from web_scraper import fetch_mdn_doc, create_mdn_context
+from mcp_protocol import MCPContext, MCPResponse
 
-# MCPの標準スキーマに合わせたモデル定義
-class MCPContext(BaseModel):
-    """MCP互換のコンテキスト構造"""
-    id: str
-    content: Dict[str, Any]
-    metadata: Dict[str, Any] = {}
-    attachments: Dict[str, Any] = {}
-
-class MCPResponse(BaseModel):
-    """MCP互換のレスポンス構造"""
-    contexts: list[MCPContext]
-    metadata: Dict[str, Any] = {}
-
+# リクエストモデル定義
 class MDNRequest(BaseModel):
     """MDNドキュメント取得リクエストのモデル"""
     url: str
@@ -48,7 +37,7 @@ app.add_middleware(
 )
 
 @app.post("/fetch-mdn")
-async def fetch_mdn_endpoint(request: MDNRequest) -> MCPResponse:
+async def fetch_mdn_endpoint(request: MDNRequest) -> Dict[str, Any]:
     """
     MDNドキュメントを取得するエンドポイント
     
@@ -94,13 +83,15 @@ async def fetch_mdn_endpoint(request: MDNRequest) -> MCPResponse:
         }
     )
     
-    return MCPResponse(
+    response = MCPResponse(
         contexts=[mcp_context],
         metadata={
             "status": "success",
             "message": "MDN document fetched successfully"
         }
     )
+    
+    return response.to_dict()
 
 @app.get("/health")
 async def health_check():
@@ -123,7 +114,7 @@ async def mcp_manifest():
 
 # MCP 互換の統合エンドポイント
 @app.post("/mcp/contexts")
-async def mcp_contexts_endpoint(request: Request) -> MCPResponse:
+async def mcp_contexts_endpoint(request: Request) -> Dict[str, Any]:
     """
     MCP標準の統合エンドポイント
     このエンドポイントではMDN URLをパラメータとして受け取り、処理します
