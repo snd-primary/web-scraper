@@ -3,14 +3,19 @@ name = "web-scraper"
 version = "0.1.0"
 description = "MDN Web Documentation Scraper for LLM Applications"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.8"
 dependencies = [
     "httpx>=0.28.1",
     "fastapi>=0.112.0",
     "uvicorn>=0.30.0",
     "beautifulsoup4>=4.12.0",
     "pydantic>=2.11.0",
+    "mcp>=0.1.0",
 ]
 
 [project.scripts]
 mdn-scraper = "main:main"
+
+[tool.setuptools]
+packages = ["web_scraper"]
+py-modules = ["main", "server"]
