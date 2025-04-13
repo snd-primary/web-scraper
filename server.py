@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import os
+import json
 from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -105,6 +106,20 @@ async def fetch_mdn_endpoint(request: MDNRequest) -> MCPResponse:
 async def health_check():
     """ヘルスチェックエンドポイント"""
     return JSONResponse(content={"status": "healthy"})
+
+# MCP マニフェストの提供
+@app.get("/mcp/manifest")
+async def mcp_manifest():
+    """MCPマニフェストを提供するエンドポイント"""
+    try:
+        with open('mcp_manifest.json', 'r', encoding='utf-8') as f:
+            manifest_data = json.load(f)
+        return JSONResponse(content=manifest_data)
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="MCP manifest file not found."
+        )
 
 # MCP 互換の統合エンドポイント
 @app.post("/mcp/contexts")
