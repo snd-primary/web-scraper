@@ -22,11 +22,10 @@ def main():
     port = int(os.environ.get("PORT", 8000))
     
     print(f"Server running at: http://{host}:{port}")
-    print("Available MCP endpoints:")
-    print(f"  - POST http://{host}:{port}/mcp/contexts")
-    print("Available custom endpoints:")
+    print("Available endpoints:")
     print(f"  - POST http://{host}:{port}/fetch-mdn")
     print(f"  - GET  http://{host}:{port}/health")
+    print(f"  - MCP  http://{host}:{port}/mcp")
     
     # FastAPIアプリケーションをuvicornで起動
     uvicorn.run(
