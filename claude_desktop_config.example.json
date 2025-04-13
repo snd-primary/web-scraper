@@ -10,9 +10,9 @@
       }
     },
     "web-scraper": {
-      "command": "node",
+      "command": "python",
       "args": [
-        "%REPO_DIR%\\dist\\index.js"
+        "%REPO_DIR%\\web_scraper_server.py"
       ]
     }
   }
