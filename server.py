@@ -1,15 +1,15 @@
 from contextlib import asynccontextmanager
 import os
-import json
-from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+# MCP SDK をインポート
+from mcp.server.fastmcp import FastMCP, Context
+
 from web_scraper import fetch_mdn_doc, create_mdn_context
-from mcp_protocol import MCPContext, MCPResponse
 
 # リクエストモデル定義
 class MDNRequest(BaseModel):
@@ -36,8 +36,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# MCP サーバーの初期化
+mcp = FastMCP("MDN Web Scraper", 
+              description="MDNウェブドキュメントをスクレイピングして提供するMCPサーバー")
+
 @app.post("/fetch-mdn")
-async def fetch_mdn_endpoint(request: MDNRequest) -> Dict[str, Any]:
+async def fetch_mdn_endpoint(request: MDNRequest):
     """
     MDNドキュメントを取得するエンドポイント
     
@@ -45,7 +49,7 @@ async def fetch_mdn_endpoint(request: MDNRequest) -> Dict[str, Any]:
         request: MDN URLを含むリクエスト
         
     Returns:
-        MCP互換のレスポンス
+        文書内容
     """
     # MDN URLの検証
     if not request.url.startswith("https://developer.mozilla.org/"):
@@ -66,79 +70,67 @@ async def fetch_mdn_endpoint(request: MDNRequest) -> Dict[str, Any]:
     # コンテキストの作成
     context_data = create_mdn_context(doc_content, request.url)
     
-    # MCP互換形式でレスポンスを構築
-    context_id = f"mdn-{request.url.split('/')[-1]}"
-    
-    mcp_context = MCPContext(
-        id=context_id,
-        content={
-            "text": context_data["content"],
-            "format": "markdown"
-        },
-        metadata={
-            "source": context_data["source"],
-            "url": context_data["url"],
-            "type": context_data["type"],
-            "instruction": context_data["instruction"]
-        }
-    )
-    
-    response = MCPResponse(
-        contexts=[mcp_context],
-        metadata={
-            "status": "success",
-            "message": "MDN document fetched successfully"
-        }
-    )
-    
-    return response.to_dict()
+    return {
+        "status": "success",
+        "content": context_data["content"],
+        "source": context_data["source"],
+        "url": context_data["url"]
+    }
 
 @app.get("/health")
 async def health_check():
     """ヘルスチェックエンドポイント"""
     return JSONResponse(content={"status": "healthy"})
 
-# MCP マニフェストの提供
-@app.get("/mcp/manifest")
-async def mcp_manifest():
-    """MCPマニフェストを提供するエンドポイント"""
-    try:
-        with open('mcp_manifest.json', 'r', encoding='utf-8') as f:
-            manifest_data = json.load(f)
-        return JSONResponse(content=manifest_data)
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="MCP manifest file not found."
-        )
-
-# MCP 互換の統合エンドポイント
-@app.post("/mcp/contexts")
-async def mcp_contexts_endpoint(request: Request) -> Dict[str, Any]:
+# MCPリソースの定義
+@mcp.resource("mdn://{path}")
+async def get_mdn_doc(path: str) -> str:
     """
-    MCP標準の統合エンドポイント
-    このエンドポイントではMDN URLをパラメータとして受け取り、処理します
+    MDNウェブドキュメントをリソースとして提供
     
     Args:
-        request: MCP互換リクエスト
+        path: ドキュメントのパス
         
     Returns:
-        MCP互換のレスポンス
+        ドキュメントの内容
     """
-    data = await request.json()
+    url = f"https://developer.mozilla.org/{path}"
+    doc_content = await fetch_mdn_doc(url)
     
-    # リクエストからURLを抽出
-    url = data.get("parameters", {}).get("url", "")
+    if not doc_content:
+        return f"Failed to fetch MDN document at {url}"
     
-    if not url:
-        raise HTTPException(
-            status_code=400,
-            detail="URL parameter is required."
-        )
+    return doc_content
+
+# MCPツールの定義
+@mcp.tool()
+async def fetch_mdn_page(url: str, ctx: Context) -> str:
+    """
+    指定したURLのMDNページを取得して分析
     
-    # 内部の既存実装を活用
-    mdn_request = MDNRequest(url=url)
-    return await fetch_mdn_endpoint(mdn_request)
+    Args:
+        url: MDNドキュメントのURL（https://developer.mozilla.org/ で始まる必要があります）
+        
+    Returns:
+        取得したドキュメントの内容
+    """
+    # URLの検証
+    if not url.startswith("https://developer.mozilla.org/"):
+        return "Error: URL must start with https://developer.mozilla.org/"
+    
+    # 進捗報告
+    ctx.info(f"Fetching document from {url}")
+    
+    # ドキュメント取得
+    doc_content = await fetch_mdn_doc(url)
+    
+    if not doc_content:
+        return f"Failed to fetch or parse MDN document from {url}"
+    
+    return doc_content
+
+# FastAPI アプリに MCP サーバーをマウント
+app.mount("/mcp", mcp.sse_app())
 
 if __name__ == "__main__":
     # このファイルが直接実行された場合は、uvicornでサーバーを起動
