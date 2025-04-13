@@ -1,34 +1,29 @@
 # Web Scraper MCP Server
 
-A ModelContextProtocol (MCP) server for web scraping, designed to be used with Claude Desktop.
+Pythonで実装されたModelContextProtocol（MCP）サーバーで、ウェブスクレイピング機能を提供します。Claude Desktopと連携して使用できます。
 
-## Features
+## 機能
 
-- Scrape content from any website
-- Filter content using CSS selectors
-- Seamlessly integrate with Claude through the MCP protocol
+- 任意のウェブサイトからコンテンツをスクレイピング
+- CSSセレクタを使用して特定の要素を抽出
+- MCPプロトコルを通じてClaudeとシームレスに連携
 
-## Installation
+## インストール
 
-1. Clone this repository:
+1. リポジトリをクローン:
    ```bash
    git clone https://github.com/snd-primary/web-scraper.git
    cd web-scraper
    ```
 
-2. Install dependencies:
+2. 依存関係のインストール:
    ```bash
-   npm install
+   pip install -r requirements.txt
    ```
 
-3. Build the project:
-   ```bash
-   npm run build
-   ```
+## Claude Desktopでの使用方法
 
-## Usage with Claude Desktop
-
-1. Update your `claude_desktop_config.json` file to include the web-scraper MCP server:
+1. `claude_desktop_config.json` ファイルを更新して、web-scraper MCPサーバーを含めます:
 
    ```json
    {
@@ -43,53 +38,46 @@ A ModelContextProtocol (MCP) server for web scraping, designed to be used with C
          }
        },
        "web-scraper": {
-         "command": "node",
+         "command": "python",
          "args": [
-           "path/to/web-scraper/dist/index.js"
+           "C:\\path\\to\\web-scraper\\web_scraper_server.py"
          ]
        }
      }
    }
    ```
 
-   Replace `path/to/web-scraper` with the actual path to where you cloned this repository.
+   `C:\\path\\to\\web-scraper` を、実際のリポジトリをクローンした場所のパスに置き換えてください。Windowsのパスでは、バックスラッシュを二重にする必要があることに注意してください。
 
-2. Restart Claude Desktop to load the updated configuration.
+2. 設定を適用するために、Claude Desktopを再起動します。
 
-3. In Claude Desktop, you can now use the web-scraper MCP server:
+3. Claude Desktopで、web-scraper MCPサーバーを使用できるようになります:
    ```
-   Please scrape the content from https://example.com and tell me what it contains.
+   https://example.com の内容をスクレイピングして、何について書かれているか教えてください。
    ```
 
-## API Reference
+   または、セレクタを使用する場合:
+   ```
+   ニュースサイト https://news-site.com から、セレクタ ".headline" を使用して見出し記事をスクレイピングしてください。
+   ```
 
-The web-scraper MCP server provides the following function:
+## API リファレンス
+
+web-scraper MCPサーバーは以下の関数を提供します:
 
 ### scrape
 
-Scrapes content from a website.
+ウェブサイトからコンテンツをスクレイピングします。
 
-**Parameters:**
-- `url` (string, required): The URL of the website to scrape
-- `selector` (string, optional): CSS selector to target specific elements
+**パラメータ:**
+- `url` (文字列, 必須): スクレイピングするウェブサイトのURL
+- `selector` (文字列, オプション): 特定の要素をターゲットにするCSSセレクタ
 
-**Returns:**
-- If a selector is provided:
-  - Text and HTML of matching elements
-  - Count of matching elements
-- If no selector is provided:
-  - Page title
-  - Meta description
-  - First 1000 characters of body text
-
-## Development
-
-To run the server in development mode:
-
-```bash
-npm run dev
-```
-
-## License
-
-MIT
+**戻り値:**
+- セレクタが提供された場合:
+  - マッチする要素のテキストとHTML
+  - マッチする要素の数
+- セレクタが提供されない場合:
+  - ページのタイトル
+  - メタ description
+  - 本文テキストの最初の1000文字
