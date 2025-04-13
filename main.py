@@ -1,7 +1,15 @@
+#!/usr/bin/env python
+"""
+MDN Web Scraper MCPサーバーのエントリーポイント
+
+このスクリプトはMDN Web Scraper MCPサーバーを起動します。
+MCPプロトコルに準拠し、MDNウェブドキュメントをスクレイピングして
+LLMアプリケーションに適したコンテキストとして提供します。
+"""
+
 import os
-import sys
-import asyncio
-from server import app
+import uvicorn
+from typing import Optional
 
 def main():
     """
@@ -14,13 +22,19 @@ def main():
     port = int(os.environ.get("PORT", 8000))
     
     print(f"Server running at: http://{host}:{port}")
-    print("Available endpoints:")
+    print("Available MCP endpoints:")
+    print(f"  - POST http://{host}:{port}/mcp/contexts")
+    print("Available custom endpoints:")
     print(f"  - POST http://{host}:{port}/fetch-mdn")
     print(f"  - GET  http://{host}:{port}/health")
     
-    # サーバーを起動
-    app.run(host=host, port=port)
-
+    # FastAPIアプリケーションをuvicornで起動
+    uvicorn.run(
+        "server:app", 
+        host=host, 
+        port=port, 
+        reload=os.environ.get("DEBUG", "").lower() == "true"
+    )
 
 if __name__ == "__main__":
     main()
