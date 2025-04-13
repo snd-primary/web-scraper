@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "web-scraper": {
+      "command": "python",
+      "args": [
+        "./claude_desktop_mcp.py"
+      ]
+    }
+  }
+}
