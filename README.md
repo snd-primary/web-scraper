@@ -90,6 +90,14 @@ POST /mcp/contexts
 }
 ```
 
+#### MCPマニフェスト取得エンドポイント
+
+```http
+GET /mcp/manifest
+```
+
+MCP接続設定に必要なマニフェスト情報を提供します。
+
 #### 従来のエンドポイント (後方互換性)
 
 ```http
@@ -132,6 +140,33 @@ GET /health
 {
   "status": "healthy"
 }
+```
+
+## Claude Desktopとの連携
+
+このMCPサーバーはClaude Desktopと連携して使用できます。以下の手順で設定を行ってください。
+
+### Claude Desktopでの設定方法
+
+1. Claude Desktopを起動し、「設定」または「Settings」メニューを開きます
+2. 「MCP Connections」または「MCPサーバー接続」の設定項目を選択します
+3. 「Add Connection」または「接続を追加」ボタンをクリックします
+4. 以下の情報を入力します：
+   - **名前**: MDN Document Scraper（任意）
+   - **エンドポイントURL**: `http://127.0.0.1:8000/mcp/contexts`（または実際のサーバーURL）
+   - **種類**: MCPサーバー
+5. 「Save」または「保存」をクリックして設定を完了します
+
+### 使用方法
+
+1. MDN Web Scraper MCPサーバーを起動します
+2. Claude Desktopで会話中に、MDNドキュメントに関する質問をします
+3. 必要に応じて、「Add Context」または「コンテキストを追加」機能を使って、MDN Web Scraperを選択し、特定のURLを指定することもできます
+
+例：
+```
+MDN Web ScraperからJavaScriptのArray.prototype.reduceについて情報を取得して説明してください。
+URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
 ```
 
 ## LLMアプリとの連携
