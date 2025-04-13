@@ -1,0 +1,4 @@
+uvicorn>=0.15.0
+fastapi>=0.100.0
+httpx>=0.24.0
+beautifulsoup4>=4.12.0
