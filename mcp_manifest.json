@@ -1,0 +1,33 @@
+{
+  "name": "MDN Document Scraper",
+  "version": "1.0.0",
+  "description": "MDNウェブドキュメントを取得し、LLMアプリケーションで利用できるようにするMCPサーバー",
+  "endpoints": {
+    "contexts": "/mcp/contexts"
+  },
+  "parameters": [
+    {
+      "name": "url",
+      "type": "string",
+      "description": "取得するMDNドキュメントのURL",
+      "required": true,
+      "pattern": "^https://developer.mozilla.org/.*$"
+    }
+  ],
+  "compatibility": {
+    "minimum_protocol_version": "1.0",
+    "recommended_protocol_version": "1.0"
+  },
+  "example_requests": [
+    {
+      "description": "JavaScriptのArray情報を取得",
+      "parameters": {
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array"
+      }
+    }
+  ],
+  "contact": {
+    "author": "snd-primary",
+    "repository": "https://github.com/snd-primary/web-scraper"
+  }
+}
