@@ -1,7 +1,7 @@
 import httpx
 from bs4 import BeautifulSoup
 import re
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 async def fetch_mdn_doc(url: str) -> Optional[str]:
     """
@@ -68,6 +68,10 @@ def create_mdn_context(doc_content: str, url: str) -> Dict[str, Any]:
     Returns:
         MCP用のコンテキスト辞書
     """
+    # MDN URLからIDを生成
+    doc_id = url.split("/")[-1] if "/" in url else "mdn-doc"
+    
+    # MCPの標準フォーマットに合わせたコンテキスト構造
     return {
         "type": "mdn_document",
         "url": url,
