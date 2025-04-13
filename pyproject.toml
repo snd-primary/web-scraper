@@ -17,5 +17,4 @@ dependencies = [
 mdn-scraper = "main:main"
 
 [tool.setuptools]
-packages = ["web_scraper"]
-py-modules = ["main", "server"]
+py-modules = ["main", "server", "web_scraper"]
